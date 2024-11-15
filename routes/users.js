@@ -14,7 +14,12 @@ router.get("/:id", async (req,res) =>{
     res.json(response)
 })
 
-router.post("/", [check("name").not().isEmpty().trim().withMessage("Name should not be empty")], async (req, res) => {
+router.post("/", 
+    [check("name").trim().not().isEmpty().withMessage("Name should not be empty or just whitespace"),
+    check("age").trim().not().isEmpty().withMessage("age should not be empty or just whitespace"),
+    check("name").isLength({min:5, max:15}).withMessage("Name must be between 5 and 15 characters").trim()]
+
+,async (req, res) => {
     const errors = validationResult(req)
     if(!errors.isEmpty()){
         res.status(400).json({error:errors.array()})
@@ -25,17 +30,20 @@ router.post("/", [check("name").not().isEmpty().trim().withMessage("Name should 
     }
 });
 
-router.put("/:id", async (req, res) => {
-    try {
+router.put("/:id",
+    [check("name").not().isEmpty().trim().withMessage("name cannot be empty")],
+    [check("age").not().isEmpty().trim().withMessage("age cannot be empty")]
+    , async (req, res) => {
+        const errors = validationResult(req)
+        if(!errors.isEmpty()){
+            res.status(400).json({error:errors.array()})
+        }else{
         // no need to assign variable here, not returning anything to res.json
         await User.update(req.body, { where: { id: req.params.id } });
 
         //MUST DO RES.JSON OR WILL GET ERROR, RES.STATUS BY ITSELF DOESNT WORK!!!
-        res.status(200).json({ message: "User updated successfully" });
-
-    } catch (e) {
-        res.status(500).json({ message: "Error updating User", error: e.message });
-    }
+        res.status(200).json({ message: "Fruit updated successfully" });
+        }
 });
 
 
